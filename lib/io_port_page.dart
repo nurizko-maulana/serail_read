@@ -43,6 +43,12 @@ class _IOPortPageState extends State<IOPortPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    port.close();
+  }
+
+  @override
   Widget build(BuildContext context) {
     reader = SerialPortReader(port, timeout: 10);
     String stringData;
@@ -92,10 +98,11 @@ class _IOPortPageState extends State<IOPortPage> {
                     child: StreamBuilder(
                       stream: reader.stream.map((data) {
                         stringData = String.fromCharCodes(data);
-                        stringData.replaceAll('\r', "");
+                        // stringData.replaceAll('\r', "");
                         stringData.replaceAll('\n', "");
-                        print("read: $stringData");
-                        io_Buffer.add("# $stringData");
+                        var output = stringData.substring(3, 7);
+                        print("read: $output");
+                        io_Buffer.add("# $output");
                       }),
                       builder: ((context, snapshot) {
                         return ListView.builder(
@@ -114,6 +121,13 @@ class _IOPortPageState extends State<IOPortPage> {
                                 ),
                               ),
                             );
+                            // return SelectableText(
+                            //   ' ${io_Buffer.last}',
+                            //   style: const TextStyle(
+                            //     fontSize: 18,
+                            //     color: Colors.white,
+                            //   ),
+                            // );
                           },
                         );
                       }),
@@ -191,8 +205,7 @@ class _IOPortPageState extends State<IOPortPage> {
                           } else {
                             setState(() {
                               io_Buffer.add(inputData.text);
-                              // port.write(inputData.text);
-                              // port.write(" ");
+
                               inputData.clear();
                             });
                             keepFocus.requestFocus();
